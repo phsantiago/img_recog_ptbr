@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title></title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="css/style.css" rel="stylesheet">
+        <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+    </head>
+    <body>
+        <form id="formulario" action="" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" onchange="previewFile()" value="">
+            <button type="send">ok</button><br/>
+            <img src="" alt="" width="500">
+            <div class="result"></div>
+        </form>
+        <script>
+            function previewFile() {
+                var preview = document.querySelector('img');
+                var file    = document.querySelector('input[type=file]').files[0];
+                var reader  = new FileReader();
+
+                reader.onloadend = function () {
+                    preview.src = reader.result;
+                }
+
+                if (file) {
+                    reader.readAsDataURL(file);
+                } else {
+                    preview.src = "";
+                }
+            }
+            $("#formulario").submit(function () {
+                var formData = new FormData(this);
+
+                $.ajax({
+                    url: 'http://localhost:5000/',
+                    type: 'POST',
+                    data: formData,
+                    success: function (data) {
+                        list = JSON.parse(data);
+                        list.forEach(function(element) {
+                            $('.result').append('<b>' + element.name + '</b> ' + element.score + '<br/>')
+                        }, this);
+                        console.log(data)
+                    },
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    xhr: function() {  // Custom XMLHttpRequest
+                        var myXhr = $.ajaxSettings.xhr();
+                        if (myXhr.upload) { // Avalia se tem suporte a propriedade upload
+                            myXhr.upload.addEventListener('progress', function () {
+                            }, false);
+                        }
+                    return myXhr;
+                    }
+                });
+
+                return false;
+            });
+        </script>
+    </body>
+</html>
